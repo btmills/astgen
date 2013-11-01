@@ -1,0 +1,33 @@
+{
+  "name": "astgen",
+  "version": "0.0.1",
+  "description": "Generate SpiderMonkey-compatible JavaScript abstract syntax trees",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "escodegen": "~0.0.25"
+  },
+  "devDependencies": {
+    "esprima": "~1.0.3"
+  },
+  "scripts": {
+    "test": "coffee test.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/btmills/astgen.git"
+  },
+  "keywords": [
+    "JavaScript",
+    "syntax",
+    "tree",
+    "ast"
+  ],
+  "author": "Brandon Mills @brandontmills",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/btmills/astgen/issues"
+  }
+}
