@@ -14,8 +14,7 @@
     "esprima": "~1.0.3"
   },
   "scripts": {
-    "install": "coffee -co lib/ src/*",
-    "test": "coffee test.coffee"
+    "install": "coffee -co lib/ src/*"
   },
   "repository": {
     "type": "git",
@@ -23,6 +22,7 @@
   },
   "keywords": [
     "JavaScript",
+    "syntax tree",
     "syntax",
     "tree",
     "ast"
