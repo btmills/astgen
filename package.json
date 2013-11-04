@@ -14,7 +14,10 @@
     "esprima": "~1.0.3"
   },
   "scripts": {
-    "install": "coffee -co lib/ src/*"
+    "build": "coffee -co lib/ src/*",
+    "clean": "rm lib/*.js",
+    "prepublish": "npm run build",
+    "postpublish": "npm run clean"
   },
   "repository": {
     "type": "git",
