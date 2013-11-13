@@ -466,7 +466,7 @@ class VariableDeclaration extends Declaration
 		isArrayOf @declarations, VariableDeclarator
 
 class VariableDeclarator extends Node
-	constructor: (patt, @init=null, loc = null) ->
+	constructor: (patt, @init = null, loc = null) ->
 		super 'VariableDeclarator', loc
 		@id = patt
 		isA @id, Pattern
@@ -491,7 +491,58 @@ class YieldExpression extends Expression
 		@argument = arg
 		isNullOr @argument, Expression
 
-
+Properties =
+	ArrayExpression: ['elts', 'loc']
+	ArrayPattern: ['elts', 'loc']
+	ArrowExpression: ['params', 'defaults', 'rest', 'body', 'isGenerator', 'isExpression', 'loc']
+	AssignmentExpression: ['op', 'left', 'right', 'loc']
+	BinaryExpression: ['op', 'left', 'right', 'loc']
+	BlockStatement: ['body', 'loc']
+	BreakStatement: ['label', 'loc']
+	CallExpression: ['callee', 'args', 'loc']
+	CatchClause: ['arg', 'guard', 'body', 'loc']
+	ComprehensionBlock: ['left', 'right', 'isForEach', 'loc']
+	ComprehensionExpression: ['body', 'blocks', 'filter', 'loc']
+	ConditionalExpression: ['test', 'cons', 'alt', 'loc']
+	ContinueStatement: ['label', 'loc']
+	DebuggerStatement: ['loc']
+	DoWhileStatement: ['body', 'test', 'loc']
+	EmptyStatement: ['loc']
+	ExpressionStatement: ['expr', 'loc']
+	ForStatement: ['init', 'test', 'update', 'body', 'loc']
+	ForInStatement: ['left', 'right', 'body', 'isForEach', 'loc']
+	ForOfStatement: ['left', 'right', 'body', 'loc']
+	FunctionDeclaration: ['id', 'params', 'defaults', 'rest', 'body', 'isGenerator', 'isExpression', 'loc']
+	FunctionExpression: ['id', 'params', 'defaults', 'rest', 'body', 'isGenerator', 'isExpression', 'loc']
+	GeneratorExpression: ['body', 'blocks', 'filter', 'loc']
+	Identifier: ['name', 'loc']
+	IfStatement: ['test', 'cons', 'alt', 'loc']
+	LabeledStatement: ['label', 'body', 'loc']
+	LetExpression: ['head', 'body', 'loc']
+	LetStatement: ['head', 'body', 'loc']
+	Literal: ['value', 'loc']
+	LogicalExpression: ['op', 'left', 'right', 'loc']
+	MemberExpression: ['obj', 'prop', 'isComputed', 'loc']
+	NewExpression: ['callee', 'args', 'loc']
+	ObjectExpression: ['props', 'loc']
+	ObjectPattern: ['props', 'loc']
+	Program: ['body', 'loc']
+	Property: ['key', 'val', 'kind', 'loc']
+	PropertyPattern: ['key', 'patt', 'loc']
+	ReturnStatement: ['arg', 'loc']
+	SequenceExpression: ['exprs', 'loc']
+	SwitchCase: ['test', 'cons', 'loc']
+	SwitchStatement: ['disc', 'cases', 'isLexical', 'loc']
+	ThisExpression: ['loc']
+	ThrowStatement: ['arg', 'loc']
+	TryStatement: ['body', 'handler', 'fin', 'loc']
+	UnaryExpression: ['op', 'arg', 'isPrefix', 'loc']
+	UpdateExpression: ['op', 'arg', 'isPrefix', 'loc']
+	VariableDeclaration: ['kind', 'dtors', 'loc']
+	VariableDeclarator: ['patt', 'init', 'loc']
+	WhileStatement: ['test', 'body', 'loc']
+	WithStatement: ['obj', 'body', 'loc']
+	YieldExpression: ['arg', 'loc']
 
 Types =
 	arrayExpression: ArrayExpression
@@ -548,7 +599,7 @@ Types =
 	withStatement: WithStatement
 	yieldExpression: YieldExpression
 
-module.exports = builders = {}
+builders = module.exports = {}
 
 # To avoid having to call builders with new, wrap constructors
 for key, value of Types
@@ -558,5 +609,20 @@ for key, value of Types
 			return new (ctor.bind.apply ctor, [null].concat args)()
 
 # Optionally move type builders into the global scope
-module.exports.globalize = ->
+globalize = module.exports.globalize = ->
 	global[type] = builders[type] for type of Types
+
+validate = module.exports.validate = (tree) ->
+	args = []
+	for prop in Properties[tree.type]
+		if !tree[prop]?
+			args.push null
+			continue
+		if Array.isArray tree[prop]
+			args.push tree[prop].map (el) -> validate el
+		else if typeof tree[prop] == 'object' and tree[prop].type?
+			args.push validate tree[prop]
+		else
+			args.push tree[prop]
+	builders[tree.type[0].toLowerCase() + tree.type[1...]].apply(null, args)
+
