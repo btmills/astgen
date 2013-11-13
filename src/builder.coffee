@@ -404,6 +404,12 @@ class SequenceExpression extends Expression
 		@expressions = exprs
 		isArrayOf @expressions, Expression
 
+class SpreadExpression extends Expression
+	constructor: (argument, loc = null) ->
+		super 'SpreadExpression', loc
+		@argument = argument
+		isA @argument, Expression
+
 class SwitchCase extends Node
 	constructor: (@test, cons, loc = null) ->
 		super 'SwitchCase', loc
@@ -528,21 +534,22 @@ Properties =
 	ObjectPattern: ['properties', 'loc']
 	Program: ['body', 'loc']
 	Property: ['key', 'value', 'kind', 'loc']
-	PropertyPattern: ['key', 'patt', 'loc']
-	ReturnStatement: ['arg', 'loc']
-	SequenceExpression: ['exprs', 'loc']
-	SwitchCase: ['test', 'cons', 'loc']
-	SwitchStatement: ['disc', 'cases', 'isLexical', 'loc']
+	PropertyPattern: ['key', 'value', 'loc']
+	ReturnStatement: ['argument', 'loc']
+	SequenceExpression: ['expressions', 'loc']
+	SpreadExpression: ['argument', 'loc']
+	SwitchCase: ['test', 'consequent', 'loc']
+	SwitchStatement: ['discriminant', 'cases', 'lexical', 'loc']
 	ThisExpression: ['loc']
-	ThrowStatement: ['arg', 'loc']
-	TryStatement: ['body', 'handler', 'fin', 'loc']
-	UnaryExpression: ['op', 'arg', 'isPrefix', 'loc']
-	UpdateExpression: ['op', 'arg', 'isPrefix', 'loc']
-	VariableDeclaration: ['kind', 'dtors', 'loc']
-	VariableDeclarator: ['patt', 'init', 'loc']
+	ThrowStatement: ['argument', 'loc']
+	TryStatement: ['block', 'handler', 'finalizer', 'loc']
+	UnaryExpression: ['operator', 'argument', 'prefix', 'loc']
+	UpdateExpression: ['operator', 'argument', 'prefix', 'loc']
+	VariableDeclaration: ['kind', 'declarations', 'loc']
+	VariableDeclarator: ['id', 'init', 'loc']
 	WhileStatement: ['test', 'body', 'loc']
-	WithStatement: ['obj', 'body', 'loc']
-	YieldExpression: ['arg', 'loc']
+	WithStatement: ['object', 'body', 'loc']
+	YieldExpression: ['argument', 'loc']
 
 Types =
 	arrayExpression: ArrayExpression
@@ -585,6 +592,7 @@ Types =
 	propertyPattern: PropertyPattern
 	returnStatement: ReturnStatement
 	sequenceExpression: SequenceExpression
+	spreadExpression: SpreadExpression
 	sourceLocation: SourceLocation
 	switchCase: SwitchCase
 	switchStatement: SwitchStatement
@@ -617,8 +625,7 @@ validate = module.exports.validate = (tree) ->
 	for prop in Properties[tree.type]
 		if !tree[prop]?
 			args.push null
-			continue
-		if Array.isArray tree[prop]
+		else if Array.isArray tree[prop]
 			# Property nodes don't always have a type property
 			if tree.type == 'ObjectExpression' && prop == 'properties'
 				args.push tree[prop].map (el) ->
