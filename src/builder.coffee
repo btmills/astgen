@@ -492,42 +492,42 @@ class YieldExpression extends Expression
 		isNullOr @argument, Expression
 
 Properties =
-	ArrayExpression: ['elts', 'loc']
-	ArrayPattern: ['elts', 'loc']
-	ArrowExpression: ['params', 'defaults', 'rest', 'body', 'isGenerator', 'isExpression', 'loc']
-	AssignmentExpression: ['op', 'left', 'right', 'loc']
-	BinaryExpression: ['op', 'left', 'right', 'loc']
+	ArrayExpression: ['elements', 'loc']
+	ArrayPattern: ['elements', 'loc']
+	ArrowExpression: ['params', 'defaults', 'rest', 'body', 'generator', 'expression', 'loc']
+	AssignmentExpression: ['operator', 'left', 'right', 'loc']
+	BinaryExpression: ['operator', 'left', 'right', 'loc']
 	BlockStatement: ['body', 'loc']
 	BreakStatement: ['label', 'loc']
-	CallExpression: ['callee', 'args', 'loc']
-	CatchClause: ['arg', 'guard', 'body', 'loc']
-	ComprehensionBlock: ['left', 'right', 'isForEach', 'loc']
+	CallExpression: ['callee', 'arguments', 'loc']
+	CatchClause: ['param', 'guard', 'body', 'loc']
+	ComprehensionBlock: ['left', 'right', 'each', 'loc']
 	ComprehensionExpression: ['body', 'blocks', 'filter', 'loc']
-	ConditionalExpression: ['test', 'cons', 'alt', 'loc']
+	ConditionalExpression: ['test', 'consequent', 'alternate', 'loc']
 	ContinueStatement: ['label', 'loc']
 	DebuggerStatement: ['loc']
 	DoWhileStatement: ['body', 'test', 'loc']
 	EmptyStatement: ['loc']
-	ExpressionStatement: ['expr', 'loc']
+	ExpressionStatement: ['expression', 'loc']
 	ForStatement: ['init', 'test', 'update', 'body', 'loc']
-	ForInStatement: ['left', 'right', 'body', 'isForEach', 'loc']
+	ForInStatement: ['left', 'right', 'body', 'each', 'loc']
 	ForOfStatement: ['left', 'right', 'body', 'loc']
-	FunctionDeclaration: ['id', 'params', 'defaults', 'rest', 'body', 'isGenerator', 'isExpression', 'loc']
-	FunctionExpression: ['id', 'params', 'defaults', 'rest', 'body', 'isGenerator', 'isExpression', 'loc']
+	FunctionDeclaration: ['id', 'params', 'defaults', 'rest', 'body', 'generator', 'expression', 'loc']
+	FunctionExpression: ['id', 'params', 'defaults', 'rest', 'body', 'generator', 'expression', 'loc']
 	GeneratorExpression: ['body', 'blocks', 'filter', 'loc']
 	Identifier: ['name', 'loc']
-	IfStatement: ['test', 'cons', 'alt', 'loc']
+	IfStatement: ['test', 'consequent', 'alternate', 'loc']
 	LabeledStatement: ['label', 'body', 'loc']
 	LetExpression: ['head', 'body', 'loc']
 	LetStatement: ['head', 'body', 'loc']
 	Literal: ['value', 'loc']
-	LogicalExpression: ['op', 'left', 'right', 'loc']
-	MemberExpression: ['obj', 'prop', 'isComputed', 'loc']
-	NewExpression: ['callee', 'args', 'loc']
-	ObjectExpression: ['props', 'loc']
-	ObjectPattern: ['props', 'loc']
+	LogicalExpression: ['operator', 'left', 'right', 'loc']
+	MemberExpression: ['object', 'property', 'computed', 'loc']
+	NewExpression: ['callee', 'arguments', 'loc']
+	ObjectExpression: ['properties', 'loc']
+	ObjectPattern: ['properties', 'loc']
 	Program: ['body', 'loc']
-	Property: ['key', 'val', 'kind', 'loc']
+	Property: ['key', 'value', 'kind', 'loc']
 	PropertyPattern: ['key', 'patt', 'loc']
 	ReturnStatement: ['arg', 'loc']
 	SequenceExpression: ['exprs', 'loc']
@@ -619,8 +619,19 @@ validate = module.exports.validate = (tree) ->
 			args.push null
 			continue
 		if Array.isArray tree[prop]
-			args.push tree[prop].map (el) -> validate el
-		else if typeof tree[prop] == 'object' and tree[prop].type?
+			# Property nodes don't always have a type property
+			if tree.type == 'ObjectExpression' && prop == 'properties'
+				args.push tree[prop].map (el) ->
+					validate {
+						type: 'Property'
+						key: tree[prop].key
+						value: tree[prop].value
+						kind: tree[prop].kind
+						loc: tree[prop].loc
+					}
+			else
+				args.push tree[prop].map (el) -> validate el
+		else if typeof tree[prop] == 'object' && tree[prop].type?
 			args.push validate tree[prop]
 		else
 			args.push tree[prop]
