@@ -128,9 +128,8 @@ class ArrayExpression extends Expression
 		isArrayOf @elements, Expression
 
 class ArrayPattern extends Pattern
-	constructor: (elts, loc = null) ->
+	constructor: (@elements, loc = null) ->
 		super 'ArrayPattern', loc
-		@elements = elts
 		isArrayOf @elements, Pattern
 
 class ArrowExpression extends Expression
@@ -146,17 +145,15 @@ class ArrowExpression extends Expression
 		isA @expression, 'boolean'
 
 class AssignmentExpression extends Expression
-	constructor: (op, @left, @right, loc = null) ->
+	constructor: (@operator, @left, @right, loc = null) ->
 		super 'AssignmentExpression', loc
-		@operator = op
 		isLiterally @operator, AssignmentOperator
 		isA @left, Expression
 		isA @right, Expression
 
 class BinaryExpression extends Expression
-	constructor: (op, @left, @right, loc = null) ->
+	constructor: (@operator, @left, @right, loc = null) ->
 		super 'BinaryExpression', loc
-		@operator = op
 		isLiterally @operator, BinaryOperator
 		isA @left, Expression
 		isA @right, Expression
@@ -172,9 +169,8 @@ class BreakStatement extends Statement
 		isNullOr @label, Identifier
 
 class CallExpression extends Expression
-	constructor: (@callee, args, loc = null) ->
+	constructor: (@callee, @arguments = [], loc = null) ->
 		super 'CallExpression', loc
-		@arguments = args
 		isA @callee, Expression
 		isArrayOf @arguments, Expression
 
@@ -202,10 +198,8 @@ class ComprehensionExpression extends Expression
 		isNullOr @filter, Expression
 
 class ConditionalExpression extends Expression
-	constructor: (@test, cons, alt, loc = null) ->
+	constructor: (@test, @consequent, @alternate, loc = null) ->
 		super 'ConditionalExpression', loc
-		@consequent = cons
-		@alternate = alt
 		isA @test, Expression
 		isA @consequent, Expression
 		isA @alternate, Expression
@@ -230,9 +224,8 @@ class EmptyStatement extends Statement
 		super 'EmptyStatement', loc
 
 class ExpressionStatement extends Statement
-	constructor: (expr, loc = null) ->
+	constructor: (@expression, loc = null) ->
 		super 'ExpressionStatement', loc
-		@expression = expr
 		isA @expression, Expression
 
 class ForStatement extends Statement
@@ -260,7 +253,7 @@ class ForOfStatement extends Statement
 		isA @body, Statement
 
 class FunctionDeclaration extends Declaration #, Function
-	constructor: (@id, @params, @defaults, @rest, @body, isGenerator = false, isExpression = false, loc = null) ->
+	constructor: (@id, @params = [], @defaults = [], @rest = null, @body, isGenerator = false, isExpression = false, loc = null) ->
 		super 'FunctionDeclaration', loc
 		@generator = isGenerator
 		@expression = isExpression
@@ -273,7 +266,7 @@ class FunctionDeclaration extends Declaration #, Function
 		isA @expression, 'boolean'
 
 class FunctionExpression extends Expression #, Function
-	constructor: (@id, @params, @defaults, @rest, @body, isGenerator = false, isExpression = false, loc = null) ->
+	constructor: (@id = null, @params = [], @defaults = [], @rest = null, @body, isGenerator = false, isExpression = false, loc = null) ->
 		super 'FunctionExpression', loc
 		@generator = isGenerator
 		@expression = isExpression
@@ -298,10 +291,8 @@ class Identifier extends Pattern #, Expression, Node
 		isA @name, 'string'
 
 class IfStatement extends Statement
-	constructor: (@test, cons, alt, loc = null) ->
+	constructor: (@test, @consequent, @alternate = null, loc = null) ->
 		super 'IfStatement', loc
-		@consequent = cons
-		@alternate = alt
 		isA @test, Expression
 		isA @consequent, Statement
 		isNullOr @alternate, Statement
@@ -336,91 +327,78 @@ class Literal extends Expression #, Node
 		isNullOr @value, [ 'string', 'boolean', 'number', RegExp ]
 
 class LogicalExpression extends Expression
-	constructor: (op, @left, @right, loc = null) ->
+	constructor: (@operator, @left, @right, loc = null) ->
 		super 'LogicalExpression', loc
-		@operator = op
 		isLiterally @operator, LogicalOperator
 		isA @left, Expression
 		isA @right, Expression
 
 class MemberExpression extends Expression
-	constructor: (obj, prop, isComputed, loc = null) ->
+	constructor: (@object, @property, isComputed = false, loc = null) ->
 		super 'MemberExpression', loc
-		@object = obj
-		@property = prop
 		@computed = isComputed
 		isA @object, Expression
 		isOneOf @property, [ Identifier, Expression ]
 		isA @computed, 'boolean'
 
 class NewExpression extends Expression
-	constructor: (@callee, args, loc = null) ->
+	constructor: (@callee, @arguments = [], loc = null) ->
 		super 'NewExpression', loc
-		@arguments = args
 		isA @callee, Expression
 		isArrayOf @arguments, Expression
 
 class ObjectExpression extends Expression
-	constructor: (props, loc = null) ->
+	constructor: (@properties = [], loc = null) ->
 		super 'ObjectExpression', loc
-		@properties = props
 		isArrayOf @properties, Property
 
 class ObjectPattern extends Pattern
-	constructor: (props, loc = null) ->
+	constructor: (@properties = [], loc = null) ->
 		super 'ObjectPattern', loc
-		@properties = props
 		isArrayOf @properties, PropertyPattern
 
 class Program extends Node
-	constructor: (@body, loc = null) ->
+	constructor: (@body = [], loc = null) ->
 		super 'Program', loc
 		isArrayOf @body, Statement
 
 class Property extends Node
-	constructor: (@key, val, @kind, loc = null) ->
+	constructor: (@key, @value, @kind, loc = null) ->
 		super 'Property', loc
-		@value = val
 		isOneOf @key, [ Literal, Identifier ]
 		isA @value, Expression
 		isLiterally @kind, [ 'init', 'get', 'set' ]
 
 class PropertyPattern extends Node
-	constructor: (@key, patt, loc = null) ->
+	constructor: (@key, @value, loc = null) ->
 		super 'PropertyPattern', loc
-		@value = patt
 		isOneOf @key, [ Literal, Identifier ]
 		isA @value, Pattern
 
 class ReturnStatement extends Statement
-	constructor: (arg, loc = null) ->
+	constructor: (@argument, loc = null) ->
 		super 'ReturnStatement', loc
-		@argument = arg
 		isNullOr @argument, Expression
 
 class SequenceExpression extends Expression
-	constructor: (exprs, loc = null) ->
+	constructor: (@expressions, loc = null) ->
 		super 'SequenceExpression', loc
-		@expressions = exprs
 		isArrayOf @expressions, Expression
 
 class SpreadExpression extends Expression
-	constructor: (argument, loc = null) ->
+	constructor: (@argument, loc = null) ->
 		super 'SpreadExpression', loc
-		@argument = argument
 		isA @argument, Expression
 
 class SwitchCase extends Node
-	constructor: (@test, cons, loc = null) ->
+	constructor: (@test, @consequent = [], loc = null) ->
 		super 'SwitchCase', loc
-		@consequent = cons
 		isNullOr @test, Expression
 		isArrayOf @consequent, Statement
 
 class SwitchStatement extends Statement
-	constructor: (disc, @cases, isLexical, loc = null) ->
+	constructor: (@discriminant, @cases, isLexical, loc = null) ->
 		super 'SwitchStatement', loc
-		@discriminant = disc
 		@lexical = isLexical
 		isA @discriminant, Expression
 		isArrayOf @cases, SwitchCase
@@ -431,50 +409,42 @@ class ThisExpression extends Expression
 		super 'ThisExpression', loc
 
 class ThrowStatement extends Statement
-	constructor: (arg, loc = null) ->
+	constructor: (@argument, loc = null) ->
 		super 'ThrowStatement', loc
-		@argument = arg
 		isA @argument, Expression
 
 class TryStatement extends Statement
-	constructor: (@body, @handler, fin, loc = null) ->
+	constructor: (@body, @handler, @finalizer, loc = null) ->
 		super 'TryStatement', loc
-		@finalizer = fin
 		isA @body, Statement
 		isNullOr @handler, CatchClause
 		isNullOr @finalizer, Statement
 
 class UnaryExpression extends Expression
-	constructor: (op, arg, isPrefix, loc = null) ->
+	constructor: (@operator, @argument, isPrefix, loc = null) ->
 		super 'UnaryExpression', loc
-		@operator = op
-		@argument = arg
 		@prefix = isPrefix
 		isLiterally @operator, UnaryOperator
 		isA @argument, Expression
 		isA @prefix, 'boolean'
 
 class UpdateExpression extends Expression
-	constructor: (op, arg, isPrefix, loc = null) ->
+	constructor: (@operator, @argument, isPrefix, loc = null) ->
 		super 'UpdateExpression', loc
-		@operator = op
-		@argument = arg
 		@prefix = isPrefix
 		isLiterally @operator, UpdateOperator
 		isA @argument, Expression
 		isA @prefix, 'boolean'
 
 class VariableDeclaration extends Declaration
-	constructor: (@kind, dtors, loc = null) ->
+	constructor: (@kind, @declarations, loc = null) ->
 		super 'VariableDeclaration', loc
-		@declarations = dtors
 		isA @kind, 'string'
 		isArrayOf @declarations, VariableDeclarator
 
 class VariableDeclarator extends Node
-	constructor: (patt, @init = null, loc = null) ->
+	constructor: (@id, @init = null, loc = null) ->
 		super 'VariableDeclarator', loc
-		@id = patt
 		isA @id, Pattern
 		isNullOr @init, Expression
 
@@ -492,9 +462,8 @@ class WithStatement extends Statement
 		isA @body, Statement
 
 class YieldExpression extends Expression
-	constructor: (arg, loc = null) ->
+	constructor: (@argument, loc = null) ->
 		super 'YieldExpression', loc
-		@argument = arg
 		isNullOr @argument, Expression
 
 Properties =
