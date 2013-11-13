@@ -1,6 +1,6 @@
 {
   "name": "astgen",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Generate SpiderMonkey-compatible JavaScript abstract syntax trees",
   "main": "index.js",
   "directories": {
